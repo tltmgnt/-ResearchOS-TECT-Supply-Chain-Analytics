@@ -1,0 +1,11 @@
+import {test} from 'node:test';import assert from 'node:assert/strict';import {readFile} from 'node:fs/promises';import {simulate,evaluate,validate,csv} from '../model.mjs';
+const demo=JSON.parse(await readFile(new URL('../example.json',import.meta.url)));
+const base=()=>({version:1,name:'Test',days:3,demand:10,stock:10,orderQty:20,reorderPoint:0,holdingCost:1,shortageCost:2,delayDays:2,demandMultiplier:2,suppliers:[{name:'A',leadDays:1,unitCost:3,orderCost:5,capacity:20}]});
+test('receipt timing and purchase commitments',()=>{const s=base(),r=simulate(s,s.suppliers[0]);assert.equal(r.fulfilled,30);assert.equal(r.lost,0);assert.equal(r.endingStock,0);assert.equal(r.inTransit,20);assert.equal(r.purchaseCost,130);assert.equal(r.holdingCost,10);assert.equal(r.totalCost,140);});
+test('disruption delays receipt and increases demand',()=>{const s=base(),r=simulate(s,s.suppliers[0],true);assert.equal(r.fulfilled,10);assert.equal(r.lost,50);assert.equal(r.inTransit,20);});
+test('capacity caps each order',()=>{const s=base();s.suppliers[0].capacity=5;const r=simulate(s,s.suppliers[0]);assert.equal(r.series[0].ordered,5);assert.equal(r.fulfilled,20);assert.equal(r.lost,10);});
+test('zero demand fill rate is undefined',()=>{const s=base();s.demand=0;const r=simulate(s,s.suppliers[0]);assert.equal(r.fillRate,null);assert.equal(r.lost,0);});
+test('input validation rejects missing, negative and nonfinite numbers',()=>{for(const v of [null,-1,NaN,Infinity,'10']){const s=base();s.demand=v;assert.throws(()=>validate(s));}});
+test('integer horizon, unique suppliers, bounded lead times',()=>{for(const change of [s=>s.days=1.5,s=>s.suppliers.push({...s.suppliers[0]}),s=>s.suppliers[0].leadDays=0]){const s=base();change(s);assert.throws(()=>validate(s));}});
+test('deterministic demo and flow conservation',()=>{const a=evaluate(demo);assert.deepEqual(a,evaluate(demo));for(const r of a){assert.ok(Math.abs(r.fulfilled+r.lost-r.demand)<1e-8);assert.ok(r.fillRate>=0&&r.fillRate<=1);assert.ok(r.totalCost>=0);}});
+test('CSV quotes and neutralizes formula prefixes',()=>{const s=base();s.suppliers[0].name='=1+1';assert.ok(csv(evaluate(s)).includes("\"'=1+1\""));});

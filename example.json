@@ -1,0 +1,37 @@
+{
+  "version": 1,
+  "name": "Synthetic regional parts study",
+  "days": 90,
+  "demand": 20,
+  "stock": 200,
+  "orderQty": 200,
+  "reorderPoint": 140,
+  "holdingCost": 0.02,
+  "shortageCost": 12,
+  "delayDays": 7,
+  "demandMultiplier": 1.3,
+  "notes": "Fictional inputs. Compare sourcing assumptions before collecting evidence.",
+  "suppliers": [
+    {
+      "name": "Regional",
+      "leadDays": 3,
+      "unitCost": 8,
+      "orderCost": 40,
+      "capacity": 200
+    },
+    {
+      "name": "Offshore",
+      "leadDays": 10,
+      "unitCost": 5,
+      "orderCost": 120,
+      "capacity": 300
+    },
+    {
+      "name": "Local",
+      "leadDays": 1,
+      "unitCost": 11,
+      "orderCost": 15,
+      "capacity": 100
+    }
+  ]
+}

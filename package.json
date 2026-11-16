@@ -1,0 +1,14 @@
+{
+  "name": "researchos-tect-supply-chain",
+  "private": true,
+  "type": "module",
+  "version": "0.1.0",
+  "scripts": {
+    "test": "node --test tests/*.test.mjs",
+    "demo": "node cli.mjs example.json",
+    "build": "node scripts/build.mjs"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}
